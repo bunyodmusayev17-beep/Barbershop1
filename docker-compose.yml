@@ -1,0 +1,23 @@
+# Lokal ishlab chiqish uchun PostgreSQL.
+# 5433-port: kompyuterdagi o'rnatilgan PostgreSQL (5432) bilan to'qnashmasligi uchun.
+services:
+  db:
+    image: postgres:17
+    container_name: nybarber-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: nybarber
+      POSTGRES_USER: nybarber
+      POSTGRES_PASSWORD: nybarber_dev
+    ports:
+      - "5433:5432"
+    volumes:
+      - nybarber-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nybarber -d nybarber"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  nybarber-db:

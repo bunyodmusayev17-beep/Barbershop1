@@ -1,0 +1,188 @@
+@import url('https://fonts.googleapis.com/css2?family=Poiret+One&family=Josefin+Sans:wght@400;600;700&family=Jost:wght@400;600;700&display=swap');
+@import 'tailwindcss';
+
+/* Dizayn: 1950-yillar Amerika interfeysi + Art Deco shriftlari */
+@theme {
+  --color-cream: #fbf6ec;
+  --color-cream-dark: #f1e8d6;
+  --color-cherry: #d62e2e;
+  --color-cherry-dark: #b02222;
+  --color-navy: #1f3d7a;
+  --color-navy-dark: #152b57;
+  --color-ink: #1a1f2e;
+  --color-muted: #6b7280;
+
+  --font-deco: 'Poiret One', serif;
+  /* Josefin Sans'da kirill yo'q — ruscha matn uchun o'xshash geometrik Jost */
+  --font-sans: 'Josefin Sans', 'Jost', system-ui, sans-serif;
+}
+
+html,
+body {
+  background: var(--color-cream);
+  color: var(--color-navy);
+  font-family: var(--font-sans);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Vertikal aylanuvchi barber-pole */
+.pole-spin {
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--color-cherry) 0 18px,
+    #fff 18px 36px,
+    var(--color-navy) 36px 54px,
+    #fff 54px 72px
+  );
+  background-size: 100% 203.6px;
+  animation: pole 3s linear infinite;
+}
+@keyframes pole {
+  to {
+    background-position: 0 203.6px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pole-spin {
+    animation: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* --- Bosish effekti: har qanday tugma/havola bosilganda kichrayadi va to'lqin tarqaladi --- */
+@layer base {
+  button,
+  a[href],
+  [role='button'] {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation; /* telefonda 300ms kechikishsiz bosish */
+    transition: scale 0.12s ease;
+  }
+}
+button:not(:disabled):active,
+a[href]:not(.inline):active,
+[role='button']:active {
+  scale: 0.96;
+}
+.ripple-ink {
+  position: absolute;
+  border-radius: 9999px;
+  background: currentColor;
+  opacity: 0.22;
+  pointer-events: none;
+  transform: scale(0);
+  animation: ripple 0.55s ease-out forwards;
+}
+@keyframes ripple {
+  to {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+/* Sahifa ochilish animatsiyasi */
+.page-enter {
+  animation: page-enter 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+/* Yuklanish chizig'i (sahifa almashganda yuqorida) */
+.route-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 3px;
+  z-index: 100;
+  background: linear-gradient(90deg, var(--color-cherry), var(--color-navy), var(--color-cherry));
+  background-size: 200% 100%;
+  transform-origin: left;
+  animation:
+    route-progress 0.9s ease-out forwards,
+    route-shimmer 1s linear infinite;
+}
+@keyframes route-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(0.85);
+  }
+}
+@keyframes route-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter,
+  .ripple-ink {
+    animation: none;
+  }
+  button:active,
+  a[href]:active {
+    scale: none;
+  }
+}
+
+/* Cheksiz lenta */
+.marquee {
+  animation: marquee 28s linear infinite;
+}
+.marquee-reverse {
+  animation-direction: reverse;
+}
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* 3D egiluvchi karta: yorug'lik aksi */
+.tilt-card {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.tilt-glare {
+  opacity: 0;
+  transition: opacity 0.3s;
+  background: radial-gradient(circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(255, 255, 255, 0.45), transparent 55%);
+}
+@media (hover: hover) and (pointer: fine) {
+  .tilt-card:hover .tilt-glare {
+    opacity: 1;
+  }
+}
+@media (hover: none) {
+  /* Telefonda will-change keraksiz — xotirani tejaymiz */
+  .tilt-card {
+    will-change: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee {
+    animation: none;
+  }
+}
+
+/* Barber-pole chizig'i */
+.barber-pole {
+  height: 16px;
+  background: repeating-linear-gradient(
+    135deg,
+    var(--color-cherry) 0 10px,
+    #fff 10px 20px,
+    var(--color-navy) 20px 30px,
+    #fff 30px 40px
+  );
+}

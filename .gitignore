@@ -1,0 +1,22 @@
+# .NET
+bin/
+obj/
+*.user
+.vs/
+backend/NyBarber.Api/wwwroot/uploads/*
+!backend/NyBarber.Api/wwwroot/uploads/.gitkeep
+
+# Node
+node_modules/
+dist/
+*.local
+
+# IDE / OS
+.idea/
+.vscode/*
+!.vscode/extensions.json
+Thumbs.db
+.DS_Store
+
+# Env
+.env
