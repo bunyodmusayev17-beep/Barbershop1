@@ -4,6 +4,7 @@ import {adminApi, STATUSES, timeOffApi, type Appointment, type AppointmentStatus
 import {useAuth} from '../../auth/AuthContext';
 import {Btn, errorText, Input, Modal, PageHeader, STATUS_LABEL, StatusBadge, money, useToast} from '../../components/admin/kit';
 import {Spinner} from '../../components/ui';
+import {Pager, usePaged} from '../../components/Pager';
 import {useSite} from '../../hooks/useSite';
 import {cn} from '../../lib/cn';
 import {addDays, parts, todayIso} from '../../lib/dates';
@@ -73,7 +74,9 @@ export default function CalendarPage() {
   });
 
   const weekday = parts(date).weekday;
-  const columns = (site.data?.barbers ?? []).filter((b) => isAdmin || b.id === user?.barberId);
+  // Ustalar ko'p bo'lsa — 6 tadan ustun, sahifalar bilan (aks holda kalendar juda keng bo'lib ketadi)
+  const paged = usePaged((site.data?.barbers ?? []).filter((b) => isAdmin || b.id === user?.barberId), 6);
+  const columns = paged.items;
   const hours = Array.from({length: END_HOUR - START_HOUR}, (_, i) => START_HOUR + i);
 
   // Hozirgi vaqt chizig'i (faqat bugun uchun)
@@ -102,6 +105,8 @@ export default function CalendarPage() {
           </>
         }
       />
+
+      <Pager page={paged.page} pages={paged.pages} onChange={paged.setPage} className="mb-4" />
 
       {appointments.isLoading || site.isLoading ? (
         <Spinner className="h-8 w-8" />

@@ -33,6 +33,8 @@ const ru: Dict = {
     chooseBarber: 'Выберите мастера',
     anyBarber: 'Любой мастер',
     anyBarberDesc: 'На ближайшее свободное время',
+    searchBarber: 'Поиск мастера по имени…',
+    noBarberFound: 'Мастер не найден',
     chooseTime: 'Выберите время',
     today: 'Сегодня',
     tomorrow: 'Завтра',

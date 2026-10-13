@@ -4,6 +4,7 @@ import {adminApi, type BarberAdmin, type BarberInput, type Hours} from '../../ap
 import {Btn, Empty, errorText, Field, Input, LangFields, Modal, PageHeader, Toggle, useToast} from '../../components/admin/kit';
 import {Monogram, Spinner} from '../../components/ui';
 import {cn} from '../../lib/cn';
+import {Pager, usePaged} from '../../components/Pager';
 
 const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
 const DAY_NAMES = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'];
@@ -55,6 +56,7 @@ export default function BarbersPage() {
   });
 
   const current = editing?.id ? barbers.data?.find((b) => b.id === editing.id) : undefined;
+  const paged = usePaged(barbers.data ?? [], 12);
   const setData = (p: Partial<BarberInput>) => editing && setEditing({...editing, data: {...editing.data, ...p}});
 
   return (
@@ -66,7 +68,7 @@ export default function BarbersPage() {
         <Empty>Hali usta yo'q</Empty>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {barbers.data.map((b) => (
+          {paged.items.map((b) => (
             <button key={b.id} type="button" onClick={() => setEditing({id: b.id, data: toInput(b)})} className={cn('rounded-2xl border-2 bg-white p-5 text-left transition hover:border-cherry', b.isActive ? 'border-navy/15' : 'border-dashed border-zinc-300 opacity-60')}>
               <div className="flex items-center gap-4">
                 {b.photoUrl ? <img src={b.photoUrl} alt="" className="h-16 w-16 rounded-full border-2 border-cherry object-cover" /> : <Monogram name={b.name || '?'} className="h-16 w-16 text-3xl" />}
@@ -85,6 +87,7 @@ export default function BarbersPage() {
           ))}
         </div>
       )}
+      <Pager page={paged.page} pages={paged.pages} onChange={paged.setPage} className="mt-6" />
 
       <Modal open={!!editing} onClose={() => setEditing(null)} title={editing?.id ? `${editing.data.name || 'Usta'}` : 'Yangi usta'} wide>
         {editing ? (

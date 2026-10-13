@@ -12,11 +12,20 @@ namespace NyBarber.Api.Features.Auth;
 /// </summary>
 public static class PasswordReset
 {
-    public static async Task RunAsync(IServiceProvider services, string login)
+    /// <param name="createAdmin">true bo'lsa va login topilmasa — yangi admin akkaunti yaratiladi (prod'da birinchi admin).</param>
+    public static async Task RunAsync(IServiceProvider services, string login, bool createAdmin = false)
     {
         using var scope = services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        var user = await db.Users.FirstOrDefaultAsync(u => u.Login == login.Trim().ToLowerInvariant());
+        login = login.Trim().ToLowerInvariant();
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Login == login);
+        if (user is null && createAdmin)
+        {
+            if (login.Length is < 3 or > 50) { Console.WriteLine("Login 3–50 belgi bo'lishi kerak."); return; }
+            user = new User {Login = login, Role = UserRole.Admin};
+            db.Users.Add(user);
+            Console.WriteLine($"Yangi admin akkaunti: '{login}'.");
+        }
         if (user is null)
         {
             Console.WriteLine($"'{login}' loginli foydalanuvchi topilmadi. Mavjudlari: {string.Join(", ", await db.Users.Select(u => u.Login).ToListAsync())}");

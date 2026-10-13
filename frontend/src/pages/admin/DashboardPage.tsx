@@ -1,8 +1,9 @@
 import {useQuery} from '@tanstack/react-query';
 import {Link} from 'react-router-dom';
-import {adminApi} from '../../api/admin';
+import {adminApi, type Stats} from '../../api/admin';
 import {Empty, PageHeader, Panel, StatusBadge, money} from '../../components/admin/kit';
 import {Spinner} from '../../components/ui';
+import {Pager, usePaged} from '../../components/Pager';
 import {parts} from '../../lib/dates';
 
 const DAYS = ['Yak', 'Dush', 'Sesh', 'Chor', 'Pay', 'Jum', 'Shan'];
@@ -53,20 +54,7 @@ export default function DashboardPage() {
         </Panel>
 
         <Panel title="Ustalar (7 kun)">
-          <ul className="divide-y divide-navy/10">
-            {data.barbers.map((b) => (
-              <li key={b.barberId} className="flex items-center justify-between py-3">
-                <div>
-                  <p className="font-bold">{b.name}</p>
-                  <p className="text-xs opacity-60">Bugun: {b.todayCount} ta</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold">{b.weekCount} ta</p>
-                  <p className="text-xs opacity-60">{money(b.weekRevenue)}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <BarberStats rows={data.barbers} />
         </Panel>
       </div>
 
@@ -110,6 +98,30 @@ export default function DashboardPage() {
           Barcha zapislar →
         </Link>
       </Panel>
+    </>
+  );
+}
+
+/** Ustalar statistikasi — ko'p bo'lsa 8 tadan sahifalarga bo'linadi. */
+function BarberStats({rows}: {rows: Stats['barbers']}) {
+  const paged = usePaged(rows, 8);
+  return (
+    <>
+      <ul className="divide-y divide-navy/10">
+        {paged.items.map((b) => (
+          <li key={b.barberId} className="flex items-center justify-between py-3">
+            <div>
+              <p className="font-bold">{b.name}</p>
+              <p className="text-xs opacity-60">Bugun: {b.todayCount} ta</p>
+            </div>
+            <div className="text-right">
+              <p className="font-bold">{b.weekCount} ta</p>
+              <p className="text-xs opacity-60">{money(b.weekRevenue)}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <Pager page={paged.page} pages={paged.pages} onChange={paged.setPage} className="mt-3" />
     </>
   );
 }

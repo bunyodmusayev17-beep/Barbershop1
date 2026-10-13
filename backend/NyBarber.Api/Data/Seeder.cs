@@ -5,7 +5,9 @@ using NyBarber.Api.Domain;
 namespace NyBarber.Api.Data;
 
 /// <summary>
-/// Bo'sh bazani namunaviy ma'lumotlar bilan to'ldiradi. Hammasi keyin admin paneldan o'zgartiriladi.
+/// Bo'sh bazaga boshlang'ich ma'lumotlarni yozadi. Sayt sozlamalari (nom, manzil, telefon) har doim yoziladi.
+/// Namunaviy xizmatlar, ustalar, sharhlar va akkauntlar — faqat Seed:SampleContent = true bo'lsa (dev).
+/// Prod'da baza toza qoladi, admin konsoldan yaratiladi: create-admin &lt;login&gt;.
 /// Parollar konfiguratsiyadan olinadi (dev: dotnet user-secrets): Seed:AdminPassword, Seed:BarberPassword.
 /// </summary>
 public static class Seeder
@@ -25,6 +27,12 @@ public static class Seeder
                 Rating = 5.0,
                 RatingCount = 195,
             });
+        }
+
+        if (!config.GetValue<bool>("Seed:SampleContent"))
+        {
+            await db.SaveChangesAsync(ct);
+            return;
         }
 
         if (!await db.Services.AnyAsync(ct))

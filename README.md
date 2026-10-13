@@ -94,3 +94,18 @@ scripts/          dev-secrets va smoke-test skriptlari
 - Telegram bot: yangi zapis haqida xabar, bir bosishda tasdiqlash, mijozga eslatma.
 - Internetga chiqarish (hosting, domen, HTTPS), production sozlamalari.
 - Namunaviy sharhlar, narxlar va ustalarni barbershopning haqiqiy ma'lumotlari bilan almashtirish.
+
+## Telegram bot va Mini App
+
+Xodimlar uchun bot (@NewyorkBarber_bot): yangi zapis xabari (admin + usta), ✅ Keldi / 🚫 Kelmadi / ❌ Bekor / 📞 tugmalari,
+ustaga 2 soat oldin eslatma, adminga kechki hisobot. Sayt Telegram ichida Mini App bo'lib ochiladi: mijoz zapis qiladi,
+xodim parolsiz o'z paneliga kiradi. Batafsil: [TELEGRAM-BOT.md](TELEGRAM-BOT.md).
+
+- Token: `Telegram:BotToken` (prod: serverdagi `.env` → `TELEGRAM_BOT_TOKEN`). Bo'sh bo'lsa bot o'chiq.
+- Xodimni ulash: panel → Foydalanuvchilar → Telegram (@username yoki ID), so'ng xodim botga /start yozadi.
+- Birinchi admin uchun CLI: `set-telegram <login> @username`.
+
+## Server (prod)
+
+https://nybarber.bunyodmusayev.uz — Docker Compose (`deploy/`), host nginx + certbot, har kuni zaxira.
+Yangilash: Git Bash'da `./deploy/deploy.sh`. Birinchi admin: `create-admin <login>` (konteyner ichida).

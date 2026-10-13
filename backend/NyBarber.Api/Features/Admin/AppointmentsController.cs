@@ -6,6 +6,7 @@ using NyBarber.Api.Data;
 using NyBarber.Api.Domain;
 using NyBarber.Api.Features.Auth;
 using NyBarber.Api.Features.Booking;
+using NyBarber.Api.Features.Telegram;
 
 namespace NyBarber.Api.Features.Admin;
 
@@ -15,7 +16,7 @@ namespace NyBarber.Api.Features.Admin;
 [ApiController]
 [Route("api/admin/appointments")]
 [Authorize(Policy = Policies.Staff)]
-public class AppointmentsController(AppDbContext db, BusinessClock clock, BookingService booking) : ControllerBase
+public class AppointmentsController(AppDbContext db, BusinessClock clock, BookingService booking, TelegramNotifier notifier) : ControllerBase
 {
     [HttpGet]
     public async Task<List<AppointmentDto>> List([FromQuery] DateOnly? from, [FromQuery] DateOnly? to, [FromQuery] int? barberId,
@@ -55,10 +56,12 @@ public class AppointmentsController(AppDbContext db, BusinessClock clock, Bookin
         if (a is null) return NotFound();
         if (OwnBarberId() is { } own && a.BarberId != own) return Forbid();
 
+        var cancelled = a.Status != AppointmentStatus.Cancelled && body.Status == AppointmentStatus.Cancelled;
         a.Status = body.Status;
         try
         {
             await db.SaveChangesAsync(ct);
+            if (cancelled) notifier.Publish(new BotEvent(BotEventKind.Cancelled, a.Id, User.UserId()));
         }
         catch (DbUpdateException ex) when (ex.InnerException is PostgresException {SqlState: PostgresErrorCodes.ExclusionViolation})
         {
@@ -74,7 +77,7 @@ public class AppointmentsController(AppDbContext db, BusinessClock clock, Bookin
         if (OwnBarberId() is { } own && req.BarberId != own) return Forbid();
         try
         {
-            var a = await booking.CreateByStaffAsync(req.ServiceId, req.BarberId, req.Date, req.Time, req.ClientName, req.ClientPhone, req.Comment, ct);
+            var a = await booking.CreateByStaffAsync(req.ServiceId, req.BarberId, req.Date, req.Time, req.ClientName, req.ClientPhone, req.Comment, User.UserId(), ct);
             return StatusCode(StatusCodes.Status201Created, a.ToDto(clock));
         }
         catch (BookingException ex)

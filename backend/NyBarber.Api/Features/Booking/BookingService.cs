@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using NyBarber.Api.Data;
 using NyBarber.Api.Domain;
+using NyBarber.Api.Features.Telegram;
 
 namespace NyBarber.Api.Features.Booking;
 
@@ -15,7 +16,7 @@ public record CreateBookingCommand(
     string? Comment,
     string Language);
 
-public class BookingService(AppDbContext db, AvailabilityService availability, BusinessClock clock, ILogger<BookingService> logger)
+public class BookingService(AppDbContext db, AvailabilityService availability, BusinessClock clock, TelegramNotifier notifier, ILogger<BookingService> logger)
 {
     /// <summary>Bitta telefon raqamdan bir vaqtda nechta faol (kelajakdagi) zapis bo'lishi mumkin.</summary>
     public const int MaxActivePerPhone = 3;
@@ -61,7 +62,8 @@ public class BookingService(AppDbContext db, AvailabilityService availability, B
             Price = service.Price,
             Comment = string.IsNullOrWhiteSpace(cmd.Comment) ? null : cmd.Comment.Trim()[..Math.Min(500, cmd.Comment.Trim().Length)],
             Language = cmd.Language is "ru" or "en" ? cmd.Language : "uz",
-            Status = AppointmentStatus.Pending,
+            // Avtomatik tasdiq — admin/usta Telegram'da xabar oladi, kerak bo'lsa bekor qiladi
+            Status = AppointmentStatus.Confirmed,
             CreatedAt = now,
         };
         db.Appointments.Add(appointment);
@@ -79,6 +81,7 @@ public class BookingService(AppDbContext db, AvailabilityService availability, B
 
         await db.Entry(appointment).Reference(a => a.Barber).LoadAsync(ct);
         appointment.Service = service;
+        notifier.Publish(new BotEvent(BotEventKind.Created, appointment.Id));
         return appointment;
     }
 
@@ -87,7 +90,7 @@ public class BookingService(AppDbContext db, AvailabilityService availability, B
     /// Ish vaqti, minimal oldindan yozilish va telefon limiti tekshirilmaydi — faqat ustma-ust tushmasligi (baza darajasida).
     /// </summary>
     public async Task<Appointment> CreateByStaffAsync(int serviceId, int barberId, DateOnly date, TimeOnly time,
-        string clientName, string clientPhone, string? comment, CancellationToken ct)
+        string clientName, string clientPhone, string? comment, int? actorUserId, CancellationToken ct)
     {
         var name = clientName.Trim();
         if (name.Length is < 2 or > 100)
@@ -125,6 +128,7 @@ public class BookingService(AppDbContext db, AvailabilityService availability, B
         }
         appointment.Barber = barber;
         appointment.Service = service;
+        notifier.Publish(new BotEvent(BotEventKind.Created, appointment.Id, actorUserId));
         return appointment;
     }
 

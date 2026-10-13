@@ -44,13 +44,14 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
     window.dispatchEvent(new Event('nyb:logout'));
   }
   if (!res.ok) {
-    let body: {title?: string; code?: string} = {};
+    let body: {title?: string; detail?: string; code?: string} = {};
     try {
       body = await res.json();
     } catch {
       /* bo'sh javob */
     }
-    throw new ApiError(res.status, body.code, body.title ?? res.statusText);
+    // ValidationProblem("...") matni detail da keladi, title esa umumiy inglizcha
+    throw new ApiError(res.status, body.code, body.detail ?? body.title ?? res.statusText);
   }
   if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;

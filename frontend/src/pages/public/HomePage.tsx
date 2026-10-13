@@ -6,6 +6,7 @@ import {HeroPole} from '../../components/fx/HeroPole';
 import {CombIcon, FloatingDecor, Marquee, RazorIcon, ScissorsIcon, SplitLetters, TiltCard} from '../../components/fx/effects';
 import {useLang} from '../../i18n';
 import {useSite} from '../../hooks/useSite';
+import {Pager, useMedia, usePaged} from '../../components/Pager';
 
 function Reveal({children, delay = 0, className}: {children: ReactNode; delay?: number; className?: string}) {
   return (
@@ -64,36 +65,43 @@ function Hero({data}: {data: SiteResponse}) {
       <FloatingDecor className="right-[40%] bottom-16 hidden text-cherry/10 md:block" speed={90} rotate={-20}>
         <CombIcon className="h-24 w-24" />
       </FloatingDecor>
-      <div className="mx-auto grid max-w-6xl items-center gap-6 px-4 py-10 md:grid-cols-[1.4fr_1fr] md:gap-10 md:py-20">
-        <motion.div initial={{opacity: 0, y: 20}} animate={{opacity: 1, y: 0}} transition={{duration: 0.6}} className="relative z-10 text-center md:text-left">
-          <Ornament className="md:justify-start text-navy">{t('hero.est')}</Ornament>
-          <h1 className="mt-5 font-deco text-cherry text-7xl leading-[0.9] sm:text-8xl md:text-9xl">
+      {/* Pole doim "New York" ning o'ng tomonida. Telefonda tugmalar pastda to'liq kenglikda, kompyuterda — matn ostida */}
+      <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_104px] items-center gap-x-3 gap-y-6 px-4 py-8 [grid-template-areas:'text_pole'_'cta_cta'] md:grid-cols-[1.4fr_1fr] md:gap-x-10 md:gap-y-8 md:py-20 md:[grid-template-areas:'text_pole'_'cta_pole']">
+        <motion.div initial={{opacity: 0, y: 20}} animate={{opacity: 1, y: 0}} transition={{duration: 0.6}} className="relative z-10 [grid-area:text] md:self-end">
+          <Ornament className="justify-start text-[10px] tracking-[0.3em] text-navy md:text-xs md:tracking-[0.35em]">{t('hero.est')}</Ornament>
+          <h1 className="mt-4 font-deco text-cherry text-5xl leading-[0.9] sm:text-7xl md:mt-5 md:text-9xl">
             <SplitLetters text="New York" delay={0.15} />
           </h1>
-          <p className="mt-3 font-deco text-navy text-2xl tracking-[0.55em] sm:text-3xl">BARBERSHOP</p>
-          <div className="mx-auto my-6 h-0.5 w-40 bg-navy md:mx-0" />
-          <p className="text-lg">{t('hero.tagline')}</p>
-          <p className="mt-1 text-sm opacity-80">{hoursLabel(s, t('hero.everyDay'))}</p>
-          <div className="mt-5 flex items-center justify-center gap-2 md:justify-start">
-            <Stars value={s.rating} className="text-xl" />
+          <p className="mt-2 font-deco text-navy text-base tracking-[0.45em] sm:text-2xl md:mt-3 md:text-3xl md:tracking-[0.55em]">BARBERSHOP</p>
+          <div className="my-4 h-0.5 w-24 bg-navy md:my-6 md:w-40" />
+          <p className="md:text-lg">{t('hero.tagline')}</p>
+          <p className="mt-1 text-xs opacity-80 md:text-sm">{hoursLabel(s, t('hero.everyDay'))}</p>
+          <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 md:mt-5">
+            <Stars value={s.rating} className="md:text-xl" />
             <span className="font-bold">{s.rating.toFixed(1)}</span>
-            <span className="text-sm opacity-70">· {t('hero.ratingCount', {count: s.ratingCount})}</span>
+            <span className="text-xs opacity-70 md:text-sm">· {t('hero.ratingCount', {count: s.ratingCount})}</span>
           </div>
-          <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row md:justify-start">
-            <ButtonLink to="/book">{t('hero.cta')} ★</ButtonLink>
-            <ButtonLink to="/#services" variant="outline">
-              {t('hero.ctaSecondary')}
-            </ButtonLink>
-          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{opacity: 0, y: 20}}
+          animate={{opacity: 1, y: 0}}
+          transition={{duration: 0.6, delay: 0.1}}
+          className="relative z-10 flex flex-col gap-3 [grid-area:cta] sm:flex-row md:gap-4 md:self-start"
+        >
+          <ButtonLink to="/book">{t('hero.cta')} ★</ButtonLink>
+          <ButtonLink to="/#services" variant="outline">
+            {t('hero.ctaSecondary')}
+          </ButtonLink>
         </motion.div>
 
         <motion.div
           initial={{opacity: 0, scale: 0.9}}
           animate={{opacity: 1, scale: 1}}
           transition={{duration: 0.7, delay: 0.15}}
-          className="order-first md:order-none"
+          className="[grid-area:pole]"
         >
-          <HeroPole className="mx-auto h-64 w-full max-w-[260px] md:h-[460px] md:max-w-[360px]" />
+          <HeroPole className="mx-auto h-[280px] w-full max-md:scale-[0.82] md:h-[460px] md:max-w-[360px]" />
         </motion.div>
       </div>
       <BarberPole />
@@ -113,20 +121,21 @@ function Services({data}: {data: SiteResponse}) {
   return (
     <section className="mx-auto max-w-6xl px-4 pt-20">
       <SectionTitle id="services" title={t('sections.services')} sub={t('sections.servicesSub')} />
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
         {data.services.map((s, i) => (
           <Reveal key={s.id} delay={i * 0.05}>
             <TiltCard max={5}>
-            <Card className="flex h-full flex-col gap-3 p-5 sm:flex-row sm:items-center">
-              <div className="flex-1">
-                <div className="flex items-baseline justify-between gap-3">
-                  <h3 className="text-xl font-bold">{pick(s.name)}</h3>
-                  <span className="whitespace-nowrap text-lg font-bold text-cherry">{money(s.price)}</span>
+            {/* Telefonda ixcham: tavsif 2 qator, tugma o'ngda; kattaroq ekranda — to'liq */}
+            <Card className="flex h-full flex-row items-center gap-3 p-3 sm:p-5">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-baseline justify-between gap-2 sm:gap-3">
+                  <h3 className="font-bold sm:text-xl">{pick(s.name)}</h3>
+                  <span className="whitespace-nowrap text-sm font-bold text-cherry sm:text-lg">{money(s.price)}</span>
                 </div>
-                <p className="mt-1 text-sm opacity-80">{pick(s.description)}</p>
-                <p className="mt-2 text-xs font-semibold tracking-widest uppercase opacity-60">⏱ {t('common.minutes', {count: s.durationMinutes})}</p>
+                <p className="mt-0.5 line-clamp-2 text-xs opacity-80 sm:mt-1 sm:line-clamp-none sm:text-sm">{pick(s.description)}</p>
+                <p className="mt-1 text-[10px] font-semibold tracking-widest uppercase opacity-60 sm:mt-2 sm:text-xs">⏱ {t('common.minutes', {count: s.durationMinutes})}</p>
               </div>
-              <ButtonLink to={`/book?service=${s.id}`} variant="outline" className="!px-4 !py-2 self-start sm:self-center">
+              <ButtonLink to={`/book?service=${s.id}`} variant="outline" className="shrink-0 !px-3 !py-1.5 !text-[11px] !tracking-[0.1em] sm:!px-4 sm:!py-2 sm:!text-sm sm:!tracking-[0.15em]">
                 {t('common.bookThis')}
               </ButtonLink>
             </Card>
@@ -141,39 +150,50 @@ function Services({data}: {data: SiteResponse}) {
 function Barbers({data}: {data: SiteResponse}) {
   const {t, pick} = useLang();
   const days = t('daysShort', {returnObjects: true}) as string[];
+  // Kompyuterda 2 qator × 3, telefon/planshetda 2 qator × 2 (yoki 4 ta ustma-ust)
+  const wide = useMedia('(min-width: 1024px)');
+  const paged = usePaged(data.barbers, wide ? 6 : 4);
+  const go = (p: number) => {
+    paged.setPage(p);
+    document.getElementById('barbers')?.scrollIntoView({behavior: 'smooth', block: 'start'});
+  };
   return (
     <section className="mx-auto max-w-6xl px-4 pt-24">
       <SectionTitle id="barbers" title={t('sections.barbers')} sub={t('sections.barbersSub')} />
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {data.barbers.map((b, i) => (
+      {/* Telefonda 2 ustunli ixcham kartochkalar, kattaroq ekranda — avvalgidek */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
+        {paged.items.map((b, i) => (
           <Reveal key={b.id} delay={i * 0.08}>
             <TiltCard>
-            <Card className="h-full overflow-hidden text-center">
-              <div className="relative bg-cream-dark px-6 pt-8 pb-6">
+            <Card className="flex h-full flex-col overflow-hidden text-center">
+              <div className="relative bg-cream-dark px-3 pt-4 pb-3 sm:px-6 sm:pt-8 sm:pb-6">
                 {b.photoUrl ? (
-                  <img src={b.photoUrl} alt={b.name} className="mx-auto h-36 w-36 rounded-full border-4 border-cherry object-cover" />
+                  <img src={b.photoUrl} alt={b.name} className="mx-auto h-20 w-20 rounded-full border-2 border-cherry object-cover sm:h-36 sm:w-36 sm:border-4" />
                 ) : (
-                  <Monogram name={b.name} className="mx-auto h-36 w-36 text-7xl" />
+                  <Monogram name={b.name} className="mx-auto h-20 w-20 text-4xl sm:h-36 sm:w-36 sm:text-7xl" />
                 )}
               </div>
-              <div className="p-5">
-                <h3 className="font-deco text-4xl text-navy">{b.name}</h3>
-                <p className="mt-1 text-xs font-bold tracking-[0.3em] uppercase text-cherry">{pick(b.title)}</p>
-                <p className="mt-3 text-sm opacity-80">{pick(b.bio)}</p>
+              <div className="flex flex-1 flex-col p-3 sm:p-5">
+                <h3 className="font-deco text-2xl text-navy sm:text-4xl">{b.name}</h3>
+                <p className="mt-1 text-[9px] font-bold tracking-[0.2em] uppercase text-cherry sm:text-xs sm:tracking-[0.3em]">{pick(b.title)}</p>
+                <p className="mt-2 line-clamp-3 text-xs opacity-80 sm:mt-3 sm:line-clamp-none sm:text-sm">{pick(b.bio)}</p>
                 {b.daysOff.length ? (
-                  <p className="mt-3 text-xs opacity-60">
+                  <p className="mt-2 text-[10px] opacity-60 sm:mt-3 sm:text-xs">
                     {t('common.dayOff')}: {b.daysOff.map((d) => days[d]).join(', ')}
                   </p>
                 ) : null}
-                <ButtonLink to={`/book?barber=${b.id}`} variant="outline" className="mt-5 !px-4 !py-2">
-                  {t('common.bookThis')}
-                </ButtonLink>
+                <div className="mt-auto pt-3 sm:pt-5">
+                  <ButtonLink to={`/book?barber=${b.id}`} variant="outline" className="!px-3 !py-1.5 !text-[11px] !tracking-[0.1em] sm:!px-4 sm:!py-2 sm:!text-sm sm:!tracking-[0.15em]">
+                    {t('common.bookThis')}
+                  </ButtonLink>
+                </div>
               </div>
             </Card>
             </TiltCard>
           </Reveal>
         ))}
       </div>
+      <Pager page={paged.page} pages={paged.pages} onChange={go} className="mt-8" />
     </section>
   );
 }

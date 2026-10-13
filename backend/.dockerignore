@@ -1,0 +1,4 @@
+**/bin
+**/obj
+NyBarber.Tests
+NyBarber.Api/wwwroot/uploads/*

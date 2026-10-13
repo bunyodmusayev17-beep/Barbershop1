@@ -35,6 +35,10 @@ public class User
     public UserRole Role { get; set; }
     public int? BarberId { get; set; }
     public Barber? Barber { get; set; }
+    /// <summary>Admin kiritgan Telegram username (kichik harflarda, @ siz). Bot/Mini App orqali birinchi kirishda TelegramUserId bog'lanadi.</summary>
+    public string? TelegramUsername { get; set; }
+    /// <summary>Bog'langan Telegram akkaunt ID (shaxsiy chat ID ham shu).</summary>
+    public long? TelegramUserId { get; set; }
     public bool IsActive { get; set; } = true;
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
@@ -113,6 +117,8 @@ public class Appointment
     public decimal Price { get; set; }
     public string? Comment { get; set; }
     public string Language { get; set; } = "uz";
+    /// <summary>Ustaga "2 soat qoldi" eslatmasi yuborilgan vaqt (takror yuborilmasligi uchun).</summary>
+    public DateTimeOffset? ReminderSentAt { get; set; }
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
 
@@ -154,4 +160,6 @@ public class SiteSettings
     public int MinLeadMinutes { get; set; } = 30;
     /// <summary>Necha kun oldinga yozilish mumkin.</summary>
     public int BookingHorizonDays { get; set; } = 14;
+    /// <summary>Kechki hisobot oxirgi marta qaysi kun uchun yuborilgan (Telegram).</summary>
+    public DateOnly? LastReportDate { get; set; }
 }

@@ -77,6 +77,8 @@ export type UserAdmin = {
   barberName: string | null;
   isActive: boolean;
   createdAt: string;
+  telegram: string | null;
+  telegramLinked: boolean;
 };
 export const ROLE_VALUE = {Admin: 0, Barber: 1} as const;
 
@@ -100,6 +102,8 @@ const json = (method: string, body?: unknown): RequestInit => ({method, body: bo
 export const authApi = {
   login: (login: string, password: string) => api<LoginResponse>('/api/auth/login', json('POST', {login, password})),
   me: () => api<UserDto>('/api/auth/me'),
+  /** Mini App: Telegram imzolagan initData bilan parolsiz kirish. Xodim bo'lmasa — undefined (204). */
+  telegram: (initData: string) => api<LoginResponse | undefined>('/api/auth/telegram', json('POST', {initData})),
 };
 
 export type StaffTimeOff = {id: number; barberId: number; barberName: string; from: string; to: string; reason: string | null};
@@ -168,9 +172,9 @@ export const adminApi = {
   deleteReview: (id: number) => api<void>(`/api/admin/reviews/${id}`, json('DELETE')),
 
   users: () => api<UserAdmin[]>('/api/admin/users'),
-  createUser: (u: {login: string; email?: string; password: string; role: 'Admin' | 'Barber'; barberId: number | null}) =>
+  createUser: (u: {login: string; email?: string; password: string; role: 'Admin' | 'Barber'; barberId: number | null; telegram: string | null}) =>
     api<UserAdmin>('/api/admin/users', json('POST', {...u, role: ROLE_VALUE[u.role]})),
-  updateUser: (id: number, u: {email?: string | null; role: 'Admin' | 'Barber'; barberId: number | null; isActive: boolean; newPassword?: string}) =>
+  updateUser: (id: number, u: {email?: string | null; role: 'Admin' | 'Barber'; barberId: number | null; isActive: boolean; newPassword?: string; telegram: string | null}) =>
     api<UserAdmin>(`/api/admin/users/${id}`, json('PUT', {...u, role: ROLE_VALUE[u.role]})),
   deleteUser: (id: number) => api<void>(`/api/admin/users/${id}`, json('DELETE')),
 

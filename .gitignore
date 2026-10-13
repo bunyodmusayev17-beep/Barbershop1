@@ -20,3 +20,9 @@ Thumbs.db
 
 # Env
 .env
+
+# Taqdimot videolari (katta fayllar)
+video/
+
+# Mijozlar ro'yxati (shaxsiy, commit va deploy qilinmaydi)
+leads/

@@ -1,0 +1,42 @@
+# Server: /opt/nybarber/docker-compose.yml (deploy.sh nusxa qiladi). Maxfiy qiymatlar .env da (faqat serverda).
+name: nybarber
+services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: nybarber
+      POSTGRES_USER: nybarber
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nybarber -d nybarber"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: ./src/backend
+    image: nybarber-api
+    restart: unless-stopped
+    depends_on:
+      db: {condition: service_healthy}
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Default: Host=db;Database=nybarber;Username=nybarber;Password=${POSTGRES_PASSWORD}
+      Jwt__Key: ${JWT_KEY:?}
+      ReverseProxy__TrustForwardedHeaders: "true"
+      # Bot tokeni serverdagi .env da (TELEGRAM_BOT_TOKEN). Bo'sh bo'lsa bot o'chiq, sayt odatdagidek ishlaydi.
+      Telegram__BotToken: ${TELEGRAM_BOT_TOKEN:-}
+      Telegram__MiniAppUrl: https://nybarber.bunyodmusayev.uz
+    volumes:
+      - ./uploads:/app/wwwroot/uploads
+
+  web:
+    build: ./src/frontend
+    image: nybarber-web
+    restart: unless-stopped
+    depends_on: [api]
+    ports:
+      - "127.0.0.1:8082:80"

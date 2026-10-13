@@ -2,6 +2,9 @@ import {defineConfig} from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
+const env = (globalThis as {process?: {env: Record<string, string | undefined>}}).process?.env ?? {};
+const apiTarget = env.API_TARGET ?? 'http://localhost:5080';
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   build: {
@@ -23,8 +26,9 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/api': 'http://localhost:5080',
-      '/uploads': 'http://localhost:5080',
+      // API_TARGET=https://nybarber.bunyodmusayev.uz — lokal API'siz, prod ma'lumotlari bilan UI'ni ko'rish uchun
+      '/api': {target: apiTarget, changeOrigin: true},
+      '/uploads': {target: apiTarget, changeOrigin: true},
     },
   },
 });

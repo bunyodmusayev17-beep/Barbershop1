@@ -7,6 +7,7 @@ import type {BookingConfirmation, PublicBarber, PublicService, SiteResponse} fro
 import {BarberPole, Button, ButtonLink, Card, Monogram, Ornament, Spinner} from '../../components/ui';
 import {cn} from '../../lib/cn';
 import {Confetti} from '../../components/fx/effects';
+import {Pager, usePaged} from '../../components/Pager';
 import {useLang} from '../../i18n';
 import {useSite} from '../../hooks/useSite';
 import {addDays, formatDate, parts, todayIso} from '../../lib/dates';
@@ -14,6 +15,7 @@ import {formatLocalPhone, isValidLocalPhone} from '../../lib/phone';
 
 type Step = 0 | 1 | 2 | 3;
 const ANY = 0; // "Istalgan usta"
+const BARBERS_PER_PAGE = 8;
 
 export default function BookingPage() {
   const {data, isLoading} = useSite();
@@ -269,9 +271,27 @@ function ServiceStep({services, selected, onPick}: {services: PublicService[]; s
 
 function BarberStep({barbers, selected, onPick}: {barbers: PublicBarber[]; selected: number | null; onPick: (id: number) => void}) {
   const {t, pick} = useLang();
+  // Ustalar ko'p bo'lsa — ism bo'yicha qidiruv va sahifalar ("Istalgan usta" doim tepada)
+  const [query, setQuery] = useState('');
+  const many = barbers.length > BARBERS_PER_PAGE;
+  const q = query.trim().toLocaleLowerCase();
+  const filtered = q ? barbers.filter((b) => b.name.toLocaleLowerCase().includes(q)) : barbers;
+  const paged = usePaged(filtered, BARBERS_PER_PAGE);
   return (
     <div>
       <StepHeading>{t('booking.chooseBarber')}</StepHeading>
+      {many ? (
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            paged.setPage(0);
+          }}
+          placeholder={t('booking.searchBarber')}
+          className="mb-3 w-full rounded-full border-2 border-navy/20 bg-white px-5 py-3 outline-none focus:border-navy"
+        />
+      ) : null}
       <div className="grid gap-3 sm:grid-cols-2">
         <button type="button" onClick={() => onPick(ANY)} className="text-left sm:col-span-2">
           <Card active={selected === ANY} className="flex items-center gap-4 p-4 hover:border-cherry">
@@ -282,7 +302,7 @@ function BarberStep({barbers, selected, onPick}: {barbers: PublicBarber[]; selec
             </div>
           </Card>
         </button>
-        {barbers.map((b) => (
+        {paged.items.map((b) => (
           <button key={b.id} type="button" onClick={() => onPick(b.id)} className="text-left">
             <Card active={selected === b.id} className="flex items-center gap-4 p-4 hover:border-cherry">
               {b.photoUrl ? (
@@ -298,6 +318,8 @@ function BarberStep({barbers, selected, onPick}: {barbers: PublicBarber[]; selec
           </button>
         ))}
       </div>
+      {q && filtered.length === 0 ? <p className="mt-4 text-center text-sm opacity-70">{t('booking.noBarberFound')}</p> : null}
+      <Pager page={paged.page} pages={paged.pages} onChange={paged.setPage} className="mt-5" />
     </div>
   );
 }

@@ -64,6 +64,9 @@ namespace NyBarber.Api.Data.Migrations
                         .HasPrecision(12)
                         .HasColumnType("numeric(12,0)");
 
+                    b.Property<DateTimeOffset?>("ReminderSentAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("ServiceId")
                         .HasColumnType("integer");
 
@@ -313,6 +316,9 @@ namespace NyBarber.Api.Data.Migrations
                     b.Property<string>("Instagram")
                         .HasColumnType("text");
 
+                    b.Property<DateOnly?>("LastReportDate")
+                        .HasColumnType("date");
+
                     b.Property<double>("Latitude")
                         .HasColumnType("double precision");
 
@@ -420,11 +426,24 @@ namespace NyBarber.Api.Data.Migrations
                     b.Property<int>("Role")
                         .HasColumnType("integer");
 
+                    b.Property<long?>("TelegramUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("TelegramUsername")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("BarberId");
 
                     b.HasIndex("Login")
+                        .IsUnique();
+
+                    b.HasIndex("TelegramUserId")
+                        .IsUnique();
+
+                    b.HasIndex("TelegramUsername")
                         .IsUnique();
 
                     b.ToTable("Users");

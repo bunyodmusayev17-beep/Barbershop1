@@ -1,13 +1,15 @@
 import {createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode} from 'react';
 import {authApi} from '../api/admin';
 import {auth} from '../api/client';
-import type {UserDto} from '../api/types';
+import type {LoginResponse, UserDto} from '../api/types';
 
 type AuthState = {
   user: UserDto | null;
   loading: boolean;
   login: (login: string, password: string) => Promise<UserDto>;
   logout: () => void;
+  /** Tayyor sessiyani o'rnatish (Mini App'dan parolsiz kirish). */
+  setSession: (res: LoginResponse) => void;
 };
 
 const Ctx = createContext<AuthState | null>(null);
@@ -40,12 +42,17 @@ export function AuthProvider({children}: {children: ReactNode}) {
     return res.user;
   }, []);
 
+  const setSession = useCallback((res: LoginResponse) => {
+    auth.token = res.token;
+    setUser(res.user);
+  }, []);
+
   const logout = useCallback(() => {
     auth.token = null;
     setUser(null);
   }, []);
 
-  const value = useMemo(() => ({user, loading, login, logout}), [user, loading, login, logout]);
+  const value = useMemo(() => ({user, loading, login, logout, setSession}), [user, loading, login, logout, setSession]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 

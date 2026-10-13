@@ -6,7 +6,7 @@ import {Btn, errorText, Field, Input, Modal, PageHeader, Panel, Select, Toggle, 
 import {Spinner} from '../../components/ui';
 import {cn} from '../../lib/cn';
 
-type Form = {id: number | null; login: string; email: string; role: 'Admin' | 'Barber'; barberId: number | null; isActive: boolean; password: string};
+type Form = {id: number | null; login: string; email: string; role: 'Admin' | 'Barber'; barberId: number | null; isActive: boolean; password: string; telegram: string; telegramLinked: boolean};
 
 export default function UsersPage() {
   const {user: me} = useAuth();
@@ -19,8 +19,8 @@ export default function UsersPage() {
   const save = useMutation({
     mutationFn: (f: Form) =>
       f.id
-        ? adminApi.updateUser(f.id, {email: f.email || null, role: f.role, barberId: f.role === 'Barber' ? f.barberId : null, isActive: f.isActive, newPassword: f.password || undefined})
-        : adminApi.createUser({login: f.login, email: f.email || undefined, password: f.password, role: f.role, barberId: f.role === 'Barber' ? f.barberId : null}),
+        ? adminApi.updateUser(f.id, {email: f.email || null, role: f.role, barberId: f.role === 'Barber' ? f.barberId : null, isActive: f.isActive, newPassword: f.password || undefined, telegram: f.telegram.trim() || null})
+        : adminApi.createUser({login: f.login, email: f.email || undefined, password: f.password, role: f.role, barberId: f.role === 'Barber' ? f.barberId : null, telegram: f.telegram.trim() || null}),
     onSuccess: () => {
       toast('Saqlandi');
       setForm(null);
@@ -41,8 +41,8 @@ export default function UsersPage() {
   const open = (u?: UserAdmin) =>
     setForm(
       u
-        ? {id: u.id, login: u.login, email: u.email ?? '', role: u.role, barberId: u.barberId, isActive: u.isActive, password: ''}
-        : {id: null, login: '', email: '', role: 'Barber', barberId: barbers.data?.[0]?.id ?? null, isActive: true, password: ''},
+        ? {id: u.id, login: u.login, email: u.email ?? '', role: u.role, barberId: u.barberId, isActive: u.isActive, password: '', telegram: u.telegram ?? '', telegramLinked: u.telegramLinked}
+        : {id: null, login: '', email: '', role: 'Barber', barberId: barbers.data?.[0]?.id ?? null, isActive: true, password: '', telegram: '', telegramLinked: false},
     );
 
   const isSelf = form?.id === me?.id;
@@ -69,6 +69,12 @@ export default function UsersPage() {
                   <div className="flex items-center gap-2 text-xs">
                     {u.barberName ? <span className="rounded-full border border-navy/20 px-2 py-0.5">{u.barberName}</span> : null}
                     <span className={cn('rounded-full px-2.5 py-0.5 font-bold', u.role === 'Admin' ? 'bg-cherry text-white' : 'bg-navy text-cream')}>{u.role === 'Admin' ? 'Admin' : 'Usta'}</span>
+                    {u.telegram ? (
+                      <span className={cn('rounded-full border px-2 py-0.5', u.telegramLinked ? 'border-emerald-600/40 text-emerald-700' : 'border-navy/20 opacity-70')} title={u.telegramLinked ? 'Telegram ulangan' : 'Botga /start yozishi kutilmoqda'}>
+                        {u.telegramLinked ? '✓ ' : '… '}
+                        {u.telegram}
+                      </span>
+                    ) : null}
                     {!u.isActive ? <span className="rounded-full bg-zinc-200 px-2 py-0.5">Bloklangan</span> : null}
                   </div>
                 </button>
@@ -112,6 +118,16 @@ export default function UsersPage() {
                 </Field>
               ) : null}
             </div>
+            <Field
+              label="Telegram (ixtiyoriy)"
+              hint={
+                form.telegramLinked
+                  ? "✓ Ulangan — yangi zapislar shu Telegram'ga keladi"
+                  : "@username yoki raqamli ID. Xodim @NewyorkBarber_bot ga /start yozganda ulanadi"
+              }
+            >
+              <Input value={form.telegram} onChange={(e) => setForm({...form, telegram: e.target.value, telegramLinked: false})} placeholder="@username" autoCapitalize="none" autoComplete="off" />
+            </Field>
             <Field label={form.id ? "Yangi parol (o'zgartirmaslik uchun bo'sh qoldiring)" : 'Parol'} hint="Kamida 8 belgi">
               <Input type="password" value={form.password} onChange={(e) => setForm({...form, password: e.target.value})} autoComplete="new-password" minLength={form.id && !form.password ? undefined : 8} required={!form.id} />
             </Field>

@@ -5,13 +5,14 @@ using Microsoft.EntityFrameworkCore;
 using NyBarber.Api.Data;
 using NyBarber.Api.Domain;
 using NyBarber.Api.Features.Auth;
+using NyBarber.Api.Features.Telegram;
 
 namespace NyBarber.Api.Features.Admin;
 
 [ApiController]
 [Route("api/admin/users")]
 [Authorize(Policy = Policies.Admin)]
-public class UsersAdminController(AppDbContext db) : ControllerBase
+public class UsersAdminController(AppDbContext db, TelegramAccounts telegram) : ControllerBase
 {
     private static readonly PasswordHasher<User> Hasher = new();
 
@@ -35,6 +36,7 @@ public class UsersAdminController(AppDbContext db) : ControllerBase
             Role = input.Role,
             BarberId = input.Role == UserRole.Barber ? input.BarberId : null,
         };
+        if (await telegram.ApplyAsync(user, input.Telegram, ct) is { } tgError) return ValidationProblem(tgError);
         user.PasswordHash = Hasher.HashPassword(user, input.Password);
         db.Users.Add(user);
         await db.SaveChangesAsync(ct);
@@ -60,6 +62,7 @@ public class UsersAdminController(AppDbContext db) : ControllerBase
         user.BarberId = input.Role == UserRole.Barber ? input.BarberId : null;
         user.IsActive = input.IsActive;
         if (!string.IsNullOrEmpty(input.NewPassword)) user.PasswordHash = Hasher.HashPassword(user, input.NewPassword);
+        if (await telegram.ApplyAsync(user, input.Telegram, ct) is { } tgError) return ValidationProblem(tgError);
         await db.SaveChangesAsync(ct);
         await db.Entry(user).Reference(u => u.Barber).LoadAsync(ct);
         return user.ToDto();

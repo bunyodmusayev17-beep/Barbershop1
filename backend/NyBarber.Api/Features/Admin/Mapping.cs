@@ -1,5 +1,6 @@
 using NyBarber.Api.Domain;
 using NyBarber.Api.Features.Booking;
+using NyBarber.Api.Features.Telegram;
 
 namespace NyBarber.Api.Features.Admin;
 
@@ -28,7 +29,8 @@ public static class Mapping
                     clock.ToLocal(t.ToUtc).ToString("yyyy-MM-ddTHH:mm"), t.Reason)).ToList());
 
     public static UserAdminDto ToDto(this User u) =>
-        new(u.Id, u.Login, u.Email, u.Role.ToString(), u.BarberId, u.Barber?.Name, u.IsActive, u.CreatedAt);
+        new(u.Id, u.Login, u.Email, u.Role.ToString(), u.BarberId, u.Barber?.Name, u.IsActive, u.CreatedAt,
+            TelegramAccounts.Display(u), u.TelegramUserId is not null);
 
     public static LocalizedText Clean(this LocalizedText? t, int max = 2000) => t is null
         ? new LocalizedText()

@@ -31,6 +31,8 @@ const uz = {
     chooseBarber: 'Ustani tanlang',
     anyBarber: 'Istalgan usta',
     anyBarberDesc: "Eng yaqin bo'sh vaqtga",
+    searchBarber: 'Usta ismini qidirish…',
+    noBarberFound: 'Bunday usta topilmadi',
     chooseTime: 'Vaqtni tanlang',
     today: 'Bugun',
     tomorrow: 'Ertaga',

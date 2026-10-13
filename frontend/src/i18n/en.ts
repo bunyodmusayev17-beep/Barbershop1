@@ -33,6 +33,8 @@ const en: Dict = {
     chooseBarber: 'Choose a barber',
     anyBarber: 'Any barber',
     anyBarberDesc: 'Earliest available time',
+    searchBarber: 'Search barber by name…',
+    noBarberFound: 'No barber found',
     chooseTime: 'Choose a time',
     today: 'Today',
     tomorrow: 'Tomorrow',

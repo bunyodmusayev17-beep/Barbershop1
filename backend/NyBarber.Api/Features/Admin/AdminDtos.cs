@@ -68,19 +68,22 @@ public record ReviewAdminDto(int Id, string AuthorName, int Rating, string Text,
 public record ReviewInput([Required, MaxLength(100)] string AuthorName, [Range(1, 5)] int Rating, [Required, MaxLength(1000)] string Text, bool IsPublished);
 
 // --- Foydalanuvchilar ---
-public record UserAdminDto(int Id, string Login, string? Email, string Role, int? BarberId, string? BarberName, bool IsActive, DateTimeOffset CreatedAt);
+public record UserAdminDto(int Id, string Login, string? Email, string Role, int? BarberId, string? BarberName, bool IsActive, DateTimeOffset CreatedAt,
+    string? Telegram, bool TelegramLinked);
 public record UserCreate(
     [Required, RegularExpression("^[a-zA-Z0-9_.-]{3,64}$")] string Login,
     [EmailAddress, MaxLength(256)] string? Email,
     [Required, MinLength(8), MaxLength(128)] string Password,
     [Required] UserRole Role,
-    int? BarberId);
+    int? BarberId,
+    [MaxLength(40)] string? Telegram = null);
 public record UserUpdate(
     [EmailAddress, MaxLength(256)] string? Email,
     [Required] UserRole Role,
     int? BarberId,
     bool IsActive,
-    [MinLength(8), MaxLength(128)] string? NewPassword);
+    [MinLength(8), MaxLength(128)] string? NewPassword,
+    [MaxLength(40)] string? Telegram = null);
 
 // --- Sozlamalar ---
 public record SettingsDto(
